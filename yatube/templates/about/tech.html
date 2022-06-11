@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Технологии{% endblock %}
+{% block content %}
+<div class="row">
+  <h1>Вот что я умею</h1>
+  <aside class="col-12 col-md-3">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <b>Python</b>
+      </li>
+      <li class="list-group-item">
+        <b>Django</b>
+      </li>
+    </ul>
+  </aside>  
+  <article class="col-12 col-md-9">
+    <p>"Технологии"</p>
+    <div class="border-top text-center py-1" style="background: lightgray;">
+      <b>Python</b>
+    </div>
+      <ol>
+        <li>
+          ООП
+        </li>
+        <li>
+          Проект модуль фитнес-трекера
+        </li>
+        <li>
+          <i>...список будет дополнен...</i>
+        </li>
+      </ol>
+    <div class="border-top text-center py-1" style="background: lightgray;">
+      <b>Django</b>
+    </div>
+      <ol>
+        <li>
+          Шаблоны и теги Django
+        </li>
+        <li>
+          База данных и Django ORM
+        </li>
+        <li>
+          Контекст-процессоры и Paginator
+        </li>
+        <li>
+          <i>...список будет дополнен...</i>
+        </li>
+      </ol>
+    </div> 
+  </article>
+</div>
+{% endblock %}
