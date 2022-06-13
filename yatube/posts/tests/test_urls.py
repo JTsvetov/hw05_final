@@ -1,10 +1,9 @@
 from http import HTTPStatus
 
-from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
-from posts.models import Group, Post
+from django.urls import reverse
 
-User = get_user_model()
+from posts.models import Group, Post, User
 
 
 class StaticURLTests(TestCase):
@@ -21,7 +20,6 @@ class StaticURLTests(TestCase):
         cls.post = Post.objects.create(
             text='Тестовый текст',
             author=cls.author,
-            id=12345,
             group=cls.group,
         )
 
@@ -41,7 +39,7 @@ class StaticURLTests(TestCase):
             '/',
             '/group/test-slug/',
             '/profile/test_user/',
-            '/posts/12345/',
+            f'/posts/{self.post.id}/',
         )
         for adress in url_path:
             with self.subTest():
@@ -56,33 +54,39 @@ class StaticURLTests(TestCase):
     # Проверка вызываемых шаблонов для каждого адреса
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        templates_url_names = {
-            '/': 'posts/index.html',
-            '/group/test-slug/': 'posts/group_list.html',
-            '/posts/12345/': 'posts/post_detail.html',
-            '/create/': 'posts/create_post.html',
-            '/posts/12345/edit/': 'posts/create_post.html',
-            '/profile/test_user/': 'posts/profile.html',
-            '/404/': 'core/404.html',
-        }
-        for adress, template in templates_url_names.items():
+        templates_url_names = (
+            ('posts:index', None, 'posts/index.html'),
+            ('posts:group_list', {self.group.slug}, 'posts/group_list.html'),
+            ('posts:profile', {self.author}, 'posts/profile.html'),
+            ('posts:post_detail', {self.post.id}, 'posts/post_detail.html'),
+            ('posts:post_edit', {self.post.id}, 'posts/create_post.html'),
+            ('posts:post_create', None, 'posts/create_post.html'),
+        )
+        for adress, args, template in templates_url_names:
             with self.subTest(adress=adress):
-                response = self.authorized_client.get(adress)
+                revers_name = reverse(adress, args=args)
+                response = self.authorized_client.get(revers_name)
                 self.assertTemplateUsed(response, template)
+
+    # Проверка вызываемого шаблона для несуществующего адреса
+    def test_urls_404_uses_correct_template(self):
+        """Страница /404/ вызывает шаблон "core/404.html"."""
+        response = self.authorized_client.get('/404/')
+        self.assertTemplateUsed(response, 'core/404.html')
 
     # Проверка доступности страницы post_edit для автора
     def test_post_edit_url_exists_at_desired_location(self):
         """Страница posts/<post_id>/edit/ доступна автору поста."""
-        response = self.authorized_client.get('/posts/12345/edit/')
+        response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверяем редирект для авторизованного пользователя - не автора
     def test_post_edit_url_redirect_no_author_on_post_detail(self):
         """Страница post_edit/ перенаправляет пользователя - не автора."""
         response = self.authorized_client_2.get(
-            '/posts/12345/edit/', follow=True)
+            f'/posts/{self.post.id}/edit/', follow=True)
         self.assertRedirects(
-            response, ('/posts/12345/'))
+            response, (f'/posts/{self.post.id}/'))
 
     # Проверяем редиректы для неавторизованного пользователя
     def test_post_create_url_redirect_anonymous_on_login(self):

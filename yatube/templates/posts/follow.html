@@ -7,6 +7,9 @@
 {% block content %}   
   <h1>Последние посты авторов из подписки</h1>
   {% cache 20 index_page page_obj %}
+  {% with follow=True %}
+    {% include 'posts/includes/switcher.html' %}
+  {% endwith %}
   {% for post in page_obj %}
     <article>
       <ul>
