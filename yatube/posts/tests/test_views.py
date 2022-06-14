@@ -123,15 +123,15 @@ class PostsPagesTests(TestCase):
             reverse('posts:post_edit', kwargs={'post_id': self.post.id}))
         self.assert_post_response(response)
 
-    def assert_post_context(self, post, id, text, author, group, image):
+    def assert_post_context(self, post):
         """Функция для проверки context на страницах index, group_list,
         profile
         """
-        self.assertEqual(post.id, id)
-        self.assertEqual(post.text, text)
-        self.assertEqual(post.author, author)
-        self.assertEqual(post.group, group)
-        self.assertEqual(post.image, image)
+        self.assertEqual(post.id, self.post.id)
+        self.assertEqual(post.text, self.post.text)
+        self.assertEqual(post.author, self.post.author)
+        self.assertEqual(post.group, self.post.group)
+        self.assertEqual(post.image, self.post.image)
 
     def test_page_index_group_list_profile_correct_context(self):
         """Шаблон index, group_list, profile
@@ -147,14 +147,7 @@ class PostsPagesTests(TestCase):
             with self.subTest():
                 response = self.authorized_client.get(adress)
                 first_object = response.context['page_obj'][0]
-                self.assert_post_context(
-                    first_object,
-                    self.post.id,
-                    self.post.text,
-                    self.author,
-                    self.group,
-                    self.post.image
-                )
+                self.assert_post_context(first_object)
 
     def test_post_detail_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом.
@@ -164,17 +157,7 @@ class PostsPagesTests(TestCase):
             'posts:post_detail', kwargs={'post_id': self.post.pk})
         )
         first_object = response.context.get('post')
-        post_id_0 = first_object.id
-        post_text_0 = first_object.text
-        post_author_0 = first_object.author
-        post_group_0 = first_object.group
-        post_image_0 = first_object.image
-
-        self.assertEqual(post_id_0, self.post.pk)
-        self.assertEqual(post_text_0, self.post.text)
-        self.assertEqual(post_author_0, self.author)
-        self.assertEqual(post_group_0, self.group)
-        self.assertEqual(post_image_0, self.post.image)
+        self.assert_post_context(first_object)
 
 
 class PaginatorViewsTest(TestCase):

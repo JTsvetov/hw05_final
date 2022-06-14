@@ -36,14 +36,15 @@ class StaticURLTests(TestCase):
     def test_url_exists_at_desired_location(self):
         """Проверка страниц доступных любому пользователю."""
         url_path = (
-            '/',
-            '/group/test-slug/',
-            '/profile/test_user/',
-            f'/posts/{self.post.id}/',
+            ('posts:index', None),
+            ('posts:group_list', {self.group.slug}),
+            ('posts:profile', {self.author}),
+            ('posts:post_detail', {self.post.id}),
         )
-        for adress in url_path:
-            with self.subTest():
-                response = self.guest_client.get(adress)
+        for adress, args in url_path:
+            with self.subTest(adress=adress):
+                revers_name = reverse(adress, args=args)
+                response = self.guest_client.get(revers_name)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     # Проверка, что запрос к несуществующей странице вернёт ошибку 404.
@@ -86,7 +87,9 @@ class StaticURLTests(TestCase):
         response = self.authorized_client_2.get(
             f'/posts/{self.post.id}/edit/', follow=True)
         self.assertRedirects(
-            response, (f'/posts/{self.post.id}/'))
+            response,
+            reverse('posts:post_detail', kwargs={'post_id': self.post.id})
+        )
 
     # Проверяем редиректы для неавторизованного пользователя
     def test_post_create_url_redirect_anonymous_on_login(self):
