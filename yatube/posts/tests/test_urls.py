@@ -32,9 +32,8 @@ class StaticURLTests(TestCase):
         self.authorized_client_2 = Client()
         self.authorized_client_2.force_login(StaticURLTests.no_author)
 
-    # Проверка доступности страниц для неавторизованного пользователя
     def test_url_exists_at_desired_location(self):
-        """Проверка страниц доступных любому пользователю."""
+        """Проверка страниц доступных неавторизованному пользователю."""
         url_path = (
             ('posts:index', None),
             ('posts:group_list', {self.group.slug}),
@@ -47,12 +46,11 @@ class StaticURLTests(TestCase):
                 response = self.guest_client.get(revers_name)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    # Проверка, что запрос к несуществующей странице вернёт ошибку 404.
     def test_page_404(self):
+        """Запрос к несуществующей странице вернёт ошибку 404"""
         response = self.guest_client.get('/404/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-    # Проверка вызываемых шаблонов для каждого адреса
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names = (
@@ -69,33 +67,36 @@ class StaticURLTests(TestCase):
                 response = self.authorized_client.get(revers_name)
                 self.assertTemplateUsed(response, template)
 
-    # Проверка вызываемого шаблона для несуществующего адреса
     def test_urls_404_uses_correct_template(self):
-        """Страница /404/ вызывает шаблон "core/404.html"."""
+        """Несуществующая страница вызывает шаблон "core/404.html"."""
         response = self.authorized_client.get('/404/')
         self.assertTemplateUsed(response, 'core/404.html')
 
-    # Проверка доступности страницы post_edit для автора
     def test_post_edit_url_exists_at_desired_location(self):
-        """Страница posts/<post_id>/edit/ доступна автору поста."""
-        response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
+        """Страница редактирования поста доступна автору поста."""
+        response = self.authorized_client.get(reverse(
+            'posts:post_edit', kwargs={'post_id': self.post.id})
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    # Проверяем редирект для авторизованного пользователя - не автора
     def test_post_edit_url_redirect_no_author_on_post_detail(self):
-        """Страница post_edit/ перенаправляет пользователя - не автора."""
-        response = self.authorized_client_2.get(
-            f'/posts/{self.post.id}/edit/', follow=True)
+        """Страница редактирования поста перенаправляет
+        пользователя - не автора.
+        """
+        response = self.authorized_client_2.get(reverse(
+            'posts:post_edit', kwargs={'post_id': self.post.id})
+        )
         self.assertRedirects(
             response,
             reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         )
 
-    # Проверяем редиректы для неавторизованного пользователя
     def test_post_create_url_redirect_anonymous_on_login(self):
-        """Страница /create/ перенаправит анонимного пользователя
+        """Страница создания поста перенаправит анонимного пользователя
         на страницу логина.
         """
-        response = self.guest_client.get('/create/', follow=True)
+        response = self.guest_client.get(reverse('posts:post_create'))
         self.assertRedirects(
-            response, '/auth/login/?next=/create/')
+            response, reverse('users:login')+'?next='
+            + reverse('posts:post_create')
+        )
