@@ -97,6 +97,6 @@ class StaticURLTests(TestCase):
         """
         response = self.guest_client.get(reverse('posts:post_create'))
         self.assertRedirects(
-            response, reverse('users:login')+'?next='
+            response, reverse('users:login') + '?next='
             + reverse('posts:post_create')
         )
