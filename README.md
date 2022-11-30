@@ -1,3 +1,33 @@
-# hw05_final
+# hw05_Final
+Социальная сеть блогеров
+## Описание
+Cоциальная сеть дает пользователям возможность создать учетную запись, публиковать записи, подписываться на любимых авторов и отмечать понравившиеся записи.
+### Технологии
+- Python 3.9.8
+- Django 2.2.19
+- Git
+- SQLite3
+### Запуск проекта в dev-режиме
+- Установите и активируйте виртуальное окружение
+- Установите зависимости из файла requirements.txt
+```
+pip install -r requirements.txt
+``` 
+- В директории проекта создайте файл .env и добавьте SECRET_KEY, необходимый для запуска проекта
+- Выполните миграции:
+```
+python manage.py migrate
+```
+- В папке с файлом manage.py выполните команду:
+```
+python manage.py runserver
+```
+Проект запустится на http://127.0.0.1:8000/.
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+Для создания суперпользователя выполните команду:
+```
+python manage.py createsuperuser
+```
+Для подтверждения регистрации и сброса пароля используйте папку sent_emails.
+### Авторы
+Евгений Цветов
